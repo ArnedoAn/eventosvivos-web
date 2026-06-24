@@ -1,0 +1,19 @@
+<div hlmCard>
+  <div hlmCardHeader>
+    <div class="flex items-start justify-between gap-2">
+      <h3 hlmCardTitle>{{ event().title }}</h3>
+      <span hlmBadge [variant]="statusVariant()">{{ event().status }}</span>
+    </div>
+    <p hlmCardDescription>{{ venueName(event().venueId) }}</p>
+  </div>
+  <div hlmCardContent class="flex flex-col gap-1 text-sm text-muted-foreground">
+    <p>
+      {{ event().startUtc | date: 'short' : '' : 'es-CO' }} —
+      {{ event().endUtc | date: 'short' : '' : 'es-CO' }}
+    </p>
+    <p class="text-base font-semibold text-foreground">${{ event().price | number: '1.0-2' }}</p>
+  </div>
+  <div hlmCardFooter>
+    <app-reserve-dialog [event]="event()" class="w-full" />
+  </div>
+</div>

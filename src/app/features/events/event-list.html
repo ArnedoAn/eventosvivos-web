@@ -1,0 +1,79 @@
+<section class="flex flex-col gap-6">
+  <h2 class="text-2xl font-semibold tracking-tight">Eventos</h2>
+
+  <div hlmCard>
+    <div hlmCardContent>
+      <form
+        [formGroup]="filterForm"
+        class="grid grid-cols-1 gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        <div hlmField>
+          <label hlmFieldLabel for="type">Tipo</label>
+          <select hlmInput id="type" formControlName="type">
+            <option value="">Todos</option>
+            @for (type of eventTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="venueId">Recinto</label>
+          <select hlmInput id="venueId" formControlName="venueId">
+            <option value="">Todos</option>
+            @for (venue of venues; track venue.id) {
+              <option [value]="venue.id">{{ venue.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="status">Estado</label>
+          <select hlmInput id="status" formControlName="status">
+            <option value="">Todos</option>
+            @for (status of eventStatuses; track status) {
+              <option [value]="status">{{ status }}</option>
+            }
+          </select>
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="from">Desde</label>
+          <input hlmInput id="from" type="datetime-local" formControlName="from" />
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="to">Hasta</label>
+          <input hlmInput id="to" type="datetime-local" formControlName="to" />
+        </div>
+
+        <div hlmField class="sm:col-span-2 lg:col-span-1">
+          <label hlmFieldLabel for="q">Buscar</label>
+          <input
+            hlmInput
+            id="q"
+            type="text"
+            formControlName="q"
+            placeholder="Título del evento"
+          />
+        </div>
+      </form>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center py-12">
+      <hlm-spinner aria-label="Cargando eventos" />
+    </div>
+  } @else if (empty()) {
+    <div hlmEmpty>
+      <p class="text-muted-foreground">No hay eventos disponibles.</p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      @for (event of events(); track event.id) {
+        <app-event-card [event]="event" />
+      }
+    </div>
+  }
+</section>

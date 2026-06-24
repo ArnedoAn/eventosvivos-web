@@ -1,0 +1,133 @@
+<div class="mx-auto max-w-2xl">
+  <div hlmCard>
+    <div hlmCardHeader>
+      <h2 hlmCardTitle>Crear evento</h2>
+      <p hlmCardDescription>Completa los datos del nuevo evento.</p>
+    </div>
+    <div hlmCardContent>
+      <form
+        [formGroup]="form"
+        (ngSubmit)="onSubmit()"
+        aria-label="Crear evento"
+        class="flex flex-col gap-4"
+      >
+        <div hlmField>
+          <label hlmFieldLabel for="title">Título</label>
+          <input
+            hlmInput
+            id="title"
+            type="text"
+            formControlName="title"
+            placeholder="Título del evento"
+          />
+          <hlm-field-error validator="required">El título es requerido.</hlm-field-error>
+          <hlm-field-error validator="minlength">Mínimo 5 caracteres.</hlm-field-error>
+          <hlm-field-error validator="maxlength">Máximo 100 caracteres.</hlm-field-error>
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="description">Descripción</label>
+          <textarea
+            hlmTextarea
+            id="description"
+            formControlName="description"
+            rows="4"
+            placeholder="Descripción del evento"
+          ></textarea>
+          <hlm-field-error validator="required">La descripción es requerida.</hlm-field-error>
+          <hlm-field-error validator="minlength">Mínimo 10 caracteres.</hlm-field-error>
+          <hlm-field-error validator="maxlength">Máximo 500 caracteres.</hlm-field-error>
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="type">Tipo</label>
+          <select hlmInput id="type" formControlName="type">
+            <option value="" disabled>Seleccione un tipo</option>
+            @for (type of eventTypes; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+          <hlm-field-error validator="required">El tipo es requerido.</hlm-field-error>
+        </div>
+
+        <div hlmField>
+          <label hlmFieldLabel for="venueId">Recinto</label>
+          <select hlmInput id="venueId" formControlName="venueId">
+            <option [value]="0" disabled>Seleccione un recinto</option>
+            @for (venue of venues; track venue.id) {
+              <option [value]="venue.id">{{ venue.name }} — {{ venue.city }} (cap. {{ venue.capacity }})</option>
+            }
+          </select>
+          <hlm-field-error validator="required">El recinto es requerido.</hlm-field-error>
+          <hlm-field-error validator="min">El recinto es requerido.</hlm-field-error>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div hlmField>
+            <label hlmFieldLabel for="startUtc">Fecha de inicio</label>
+            <input hlmInput id="startUtc" type="datetime-local" formControlName="startUtc" />
+            <hlm-field-error validator="required">La fecha de inicio es requerida.</hlm-field-error>
+          </div>
+
+          <div hlmField>
+            <label hlmFieldLabel for="endUtc">Fecha de finalización</label>
+            <input hlmInput id="endUtc" type="datetime-local" formControlName="endUtc" />
+            <hlm-field-error validator="required">La fecha de fin es requerida.</hlm-field-error>
+            @if (
+              form.errors?.['dateRange'] &&
+              (form.get('endUtc')?.touched || form.get('startUtc')?.touched)
+            ) {
+              <p class="text-sm text-destructive">
+                La fecha de fin debe ser posterior a la de inicio.
+              </p>
+            }
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div hlmField>
+            <label hlmFieldLabel for="capacity">Capacidad</label>
+            <input hlmInput id="capacity" type="number" formControlName="capacity" min="1" />
+            <hlm-field-error validator="required">La capacidad es requerida.</hlm-field-error>
+            <hlm-field-error validator="min">Debe ser mayor a 0.</hlm-field-error>
+            @if (form.errors?.['capacityExceedsVenue'] && form.get('capacity')?.touched) {
+              <p class="text-sm text-destructive">
+                La capacidad no puede superar la del recinto
+                (máx. {{ form.errors?.['capacityExceedsVenue']?.max }}).
+              </p>
+            }
+          </div>
+
+          <div hlmField>
+            <label hlmFieldLabel for="price">Precio</label>
+            <input
+              hlmInput
+              id="price"
+              type="number"
+              formControlName="price"
+              min="0.01"
+              step="0.01"
+            />
+            <hlm-field-error validator="required">El precio es requerido.</hlm-field-error>
+            <hlm-field-error validator="min">Debe ser mayor a 0.</hlm-field-error>
+          </div>
+        </div>
+
+        @if (serverError()) {
+          <div hlmAlert variant="destructive" role="alert">
+            <p hlmAlertDescription>{{ serverError() }}</p>
+          </div>
+        }
+
+        <div hlmCardFooter class="px-0 pb-0">
+          <button hlmBtn type="submit" class="w-full" [disabled]="form.invalid || pending()">
+            @if (pending()) {
+              <hlm-spinner class="mr-2" aria-label="Creando" />
+            }
+            {{ pending() ? 'Creando evento...' : 'Crear evento' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

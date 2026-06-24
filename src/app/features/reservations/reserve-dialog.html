@@ -1,0 +1,101 @@
+@if (canReserve()) {
+  <hlm-dialog>
+    <button hlmBtn class="w-full" type="button" hlmDialogTrigger>Reservar</button>
+
+    <hlm-dialog-content *hlmDialogPortal>
+      @if (result(); as reservation) {
+        <hlm-dialog-header>
+          <h3 hlmDialogTitle>Reserva creada</h3>
+          <p hlmDialogDescription>{{ event().title }}</p>
+        </hlm-dialog-header>
+
+        <div class="grid gap-3 py-2">
+          <div hlmAlert>
+            <h4 hlmAlertTitle>Estado</h4>
+            <p hlmAlertDescription>{{ reservation.status }}</p>
+          </div>
+          <div hlmAlert>
+            <h4 hlmAlertTitle>Cantidad</h4>
+            <p hlmAlertDescription>{{ reservation.quantity }} entrada(s)</p>
+          </div>
+          <div hlmAlert>
+            <h4 hlmAlertTitle>Comprador</h4>
+            <p hlmAlertDescription>{{ reservation.buyerName }} — {{ reservation.buyerEmail }}</p>
+          </div>
+        </div>
+
+        <hlm-dialog-footer>
+          <button hlmBtn type="button" hlmDialogClose (click)="reset()">Cerrar</button>
+        </hlm-dialog-footer>
+      } @else {
+        <hlm-dialog-header>
+          <h3 hlmDialogTitle>Reservar entradas</h3>
+          <p hlmDialogDescription>{{ event().title }}</p>
+        </hlm-dialog-header>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="grid gap-4 py-2">
+          @if (error(); as errorMessage) {
+            <div hlmAlert variant="destructive">
+              <h4 hlmAlertTitle>Error</h4>
+              <p hlmAlertDescription>{{ errorMessage }}</p>
+            </div>
+          }
+
+          <div hlmField>
+            <label hlmFieldLabel for="quantity-{{ event().id }}">Cantidad</label>
+            <input
+              hlmInput
+              id="quantity-{{ event().id }}"
+              type="number"
+              formControlName="quantity"
+              min="1"
+              placeholder="1"
+            />
+            <hlm-field-error validator="required">La cantidad es requerida.</hlm-field-error>
+            <hlm-field-error validator="min">La cantidad debe ser al menos 1.</hlm-field-error>
+          </div>
+
+          <div hlmField>
+            <label hlmFieldLabel for="buyerName-{{ event().id }}">Nombre completo</label>
+            <input
+              hlmInput
+              id="buyerName-{{ event().id }}"
+              type="text"
+              formControlName="buyerName"
+              placeholder="Tu nombre"
+            />
+            <hlm-field-error>El nombre es requerido.</hlm-field-error>
+          </div>
+
+          <div hlmField>
+            <label hlmFieldLabel for="buyerEmail-{{ event().id }}">Correo electrónico</label>
+            <input
+              hlmInput
+              id="buyerEmail-{{ event().id }}"
+              type="email"
+              formControlName="buyerEmail"
+              placeholder="tu@correo.com"
+            />
+            <hlm-field-error validator="required">El correo es requerido.</hlm-field-error>
+            <hlm-field-error validator="email">El correo no es válido.</hlm-field-error>
+          </div>
+
+          <hlm-dialog-footer>
+            <button hlmBtn class="w-full" type="submit" [disabled]="submitDisabled()">
+              @if (loading()) {
+                <span class="flex items-center gap-2">
+                  <hlm-spinner class="size-4" />
+                  Reservando...
+                </span>
+              } @else {
+                Confirmar reserva
+              }
+            </button>
+          </hlm-dialog-footer>
+        </form>
+      }
+    </hlm-dialog-content>
+  </hlm-dialog>
+} @else if (!authStore.isAuthenticated()) {
+  <a hlmBtn variant="outline" class="w-full" routerLink="/login">Iniciar sesión para reservar</a>
+}

@@ -1,0 +1,100 @@
+<section class="mx-auto flex max-w-2xl flex-col gap-6">
+  <h2 class="text-2xl font-semibold tracking-tight">Administrar reservas</h2>
+
+  <div hlmCard>
+    <div hlmCardHeader>
+      <h3 hlmCardTitle>Operar por ID de reserva</h3>
+      <p hlmCardDescription>Ingresa el UUID de la reserva para confirmarla o cancelarla.</p>
+    </div>
+    <div hlmCardContent class="flex flex-col gap-4">
+      <div hlmField>
+        <label hlmFieldLabel for="reservationId">ID de reserva</label>
+        <input
+          hlmInput
+          id="reservationId"
+          type="text"
+          [ngModel]="reservationId()"
+          (ngModelChange)="reservationId.set($event); result.set(null); errorMessage.set(null)"
+          placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+          [disabled]="!!pending()"
+        />
+      </div>
+
+      @if (errorMessage()) {
+        <div hlmAlert variant="destructive">
+          <h4 hlmAlertTitle>Error</h4>
+          <p hlmAlertDescription>{{ errorMessage() }}</p>
+        </div>
+      }
+
+      @if (result(); as reservation) {
+        <hr hlmSeparator />
+        <div class="flex flex-col gap-3 rounded-md border p-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-muted-foreground">ID</span>
+            <span class="font-mono text-sm">{{ reservation.id }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-muted-foreground">Comprador</span>
+            <span>{{ reservation.buyerName }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-muted-foreground">Correo</span>
+            <span>{{ reservation.buyerEmail }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-muted-foreground">Cantidad</span>
+            <span>{{ reservation.quantity }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-muted-foreground">Estado</span>
+            <span hlmBadge [variant]="statusVariant(reservation.status)">
+              {{ statusLabel(reservation.status) }}
+            </span>
+          </div>
+        </div>
+      }
+
+      <div class="flex gap-3">
+        <button
+          hlmBtn
+          type="button"
+          class="flex-1"
+          (click)="confirm()"
+          [disabled]="!reservationId() || pending() === 'confirm' || (!!result() && !canConfirm())"
+        >
+          @if (pending() === 'confirm') {
+            <hlm-spinner class="mr-2 size-4" />
+          }
+          Confirmar
+        </button>
+
+        <button
+          hlmBtn
+          variant="destructive"
+          type="button"
+          class="flex-1"
+          (click)="cancel()"
+          [disabled]="!reservationId() || pending() === 'cancel' || (!!result() && !canCancel())"
+        >
+          @if (pending() === 'cancel') {
+            <hlm-spinner class="mr-2 size-4" />
+          }
+          Cancelar
+        </button>
+
+        @if (result()) {
+          <button hlmBtn variant="outline" type="button" (click)="reset()">
+            Nueva consulta
+          </button>
+        }
+      </div>
+
+      @if (result()?.status === 'PendientePago') {
+        <p class="text-sm text-muted-foreground">
+          Solo se pueden cancelar reservas <strong>confirmadas</strong>.
+        </p>
+      }
+    </div>
+  </div>
+</section>

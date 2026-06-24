@@ -1,0 +1,64 @@
+<section class="flex flex-col gap-6">
+  <div class="flex items-center justify-between gap-4">
+    <h2 class="text-2xl font-semibold tracking-tight">Reporte de ocupación</h2>
+    <a hlmBtn variant="outline" routerLink="/events">Volver</a>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center py-12">
+      <hlm-spinner aria-label="Cargando reporte" />
+    </div>
+  } @else if (error()) {
+    <div hlmAlert variant="destructive">
+      <h4 hlmAlertTitle>Error</h4>
+      <p hlmAlertDescription>No se pudo cargar el reporte de ocupación.</p>
+    </div>
+  } @else if (data()) {
+    <div hlmCard>
+      <div hlmCardHeader>
+        <div class="flex items-start justify-between gap-4">
+          <h3 hlmCardTitle>{{ data()?.title }}</h3>
+          <span hlmBadge [variant]="statusVariant()">{{ data()?.status }}</span>
+        </div>
+      </div>
+
+      <div hlmCardContent class="flex flex-col gap-6">
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div>
+            <p class="text-sm text-muted-foreground">Vendidas (confirmadas)</p>
+            <p class="text-2xl font-semibold">{{ data()?.soldConfirmed }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-muted-foreground">Disponibles</p>
+            <p class="text-2xl font-semibold">{{ data()?.availableRemaining }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-muted-foreground">Perdidas por penalización</p>
+            <p class="text-2xl font-semibold">{{ data()?.retainedByPenalty }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-muted-foreground">Capacidad total</p>
+            <p class="text-2xl font-semibold">{{ data()?.capacity }}</p>
+          </div>
+        </div>
+
+        <hr hlmSeparator />
+
+        <div>
+          <div class="mb-2 flex items-center justify-between">
+            <p class="text-sm text-muted-foreground">Ocupación</p>
+            <p class="text-sm font-medium">{{ data()?.occupancyPercent | number: '1.0-1' }}%</p>
+          </div>
+          <hlm-progress [value]="occupancyBarValue()">
+            <div hlmProgressIndicator></div>
+          </hlm-progress>
+        </div>
+
+        <div>
+          <p class="text-sm text-muted-foreground">Ingresos totales</p>
+          <p class="text-2xl font-semibold">${{ data()?.totalRevenue | number: '1.0-2' }}</p>
+        </div>
+      </div>
+    </div>
+  }
+</section>

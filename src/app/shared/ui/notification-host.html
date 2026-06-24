@@ -1,0 +1,14 @@
+@for (message of messages(); track message.id) {
+  <hlm-alert [variant]="message.variant">
+    <p hlmAlertDescription>{{ message.text }}</p>
+    <button
+      hlmBtn
+      size="icon"
+      variant="ghost"
+      (click)="remove(message.id)"
+      aria-label="Cerrar notificación"
+    >
+      &times;
+    </button>
+  </hlm-alert>
+}

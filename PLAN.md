@@ -25,18 +25,18 @@
 
 ## Requirement → Task Map
 
-| Capability | Task |
-|-----------|------|
-| Project config, env, routing shell | 1 |
-| Models + ApiClient services | 2 |
-| Auth (login, token store, interceptor, guard) | 3 |
-| Event list + filters (RF-02) | 4 |
-| Create event form (RF-01, admin) | 5 |
-| Reserve modal (RF-03) | 6 |
-| Admin confirm/cancel (RF-04/05) | 7 |
-| Occupancy report view (RF-06) | 8 |
-| Error/loading UX + notifications | 9 |
-| Dockerfile (nginx) + README | 10 |
+| Capability                                    | Task |
+| --------------------------------------------- | ---- |
+| Project config, env, routing shell            | 1    |
+| Models + ApiClient services                   | 2    |
+| Auth (login, token store, interceptor, guard) | 3    |
+| Event list + filters (RF-02)                  | 4    |
+| Create event form (RF-01, admin)              | 5    |
+| Reserve modal (RF-03)                         | 6    |
+| Admin confirm/cancel (RF-04/05)               | 7    |
+| Occupancy report view (RF-06)                 | 8    |
+| Error/loading UX + notifications              | 9    |
+| Dockerfile (nginx) + README                   | 10   |
 
 ---
 
@@ -90,6 +90,7 @@ src/
 **Files:** `core/models/*.ts`, `core/api/*.service.ts`.
 
 **Interfaces produced:**
+
 - `EventResponse`, `CreateEventRequest`, `EventFilter`, `ReservationResponse`, `CreateReservationRequest`, `OccupancyResponse`, `LoginRequest`, `LoginResponse` — fields mirror backend DTOs in `eventosvivos-api/PLAN.md`.
 - `EventsApiService`: `list(filter): Observable<EventResponse[]>` (builds query params), `create(req): Observable<EventResponse>`, `occupancy(id): Observable<OccupancyResponse>`.
 - `ReservationsApiService`: `create(req)`, `confirm(id)`, `cancel(id)`.
@@ -108,6 +109,7 @@ src/
 **Files:** `core/auth/auth.store.ts`, `auth.guard.ts`, `core/http/auth.interceptor.ts`, `error.interceptor.ts`, `features/auth/login.component.ts`.
 
 **Interfaces produced:**
+
 - `AuthStore` (signal): `token: Signal<string|null>`, `role: Signal<Role|null>`, `isAuthenticated: Signal<boolean>`, `login(res)`, `logout()`; persists token to `localStorage`, restores on init; decodes role from JWT or login response.
 - `authGuard(requiredRole?)`: redirects to `/login` if unauthenticated, to `/events` if role mismatch.
 - `authInterceptor`: adds `Authorization: Bearer` when token present.
