@@ -8,8 +8,8 @@ WORKDIR /app
 # Copy package manifests first for better layer caching
 COPY package.json pnpm-lock.yaml ./
 
-# Install pnpm and dependencies
-RUN npm install -g pnpm && \
+# Install pnpm (pinned to match packageManager field) and dependencies
+RUN corepack enable && corepack prepare pnpm@11.9.0 --activate && \
     pnpm install --frozen-lockfile
 
 # Copy the rest of the source code
