@@ -10,6 +10,7 @@ import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 
 import { AuthApiService } from '../../core/api/auth-api.service';
 import { AuthStore } from '../../core/auth/auth.store';
+import { mapErrorToSpanish } from '../../core/http/error-messages';
 
 @Component({
   selector: 'app-login',
@@ -53,9 +54,14 @@ export class Login {
         this.pending.set(false);
         void this.router.navigate(['/events']);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.pending.set(false);
-        this.errorMessage.set('No se pudo iniciar sesión. Verifique sus credenciales.');
+        const body = (err as { error?: Record<string, unknown> })?.error;
+        this.errorMessage.set(mapErrorToSpanish(
+          body?.['detail'] as string,
+          body?.['code'] as string,
+          (err as { status?: number })?.status,
+        ));
       },
     });
   }
