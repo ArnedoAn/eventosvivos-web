@@ -95,7 +95,7 @@ export class ReservationAdmin {
 
     this.reservationsApi.confirm(r.id).subscribe({
       next: (updated) => {
-        this.reservations.update((list) => list.map((x) => (x.id === updated.id ? updated : x)));
+        this.reservations.update((list) => list.map((x) => (x.id === updated.id ? { ...x, ...updated } : x)));
         this.pending.update((p) => { const copy = { ...p }; delete copy[r.id]; return copy; });
       },
       error: (err: unknown) => {
@@ -111,7 +111,7 @@ export class ReservationAdmin {
 
     this.reservationsApi.cancel(r.id).subscribe({
       next: (updated) => {
-        this.reservations.update((list) => list.map((x) => (x.id === updated.id ? updated : x)));
+        this.reservations.update((list) => list.map((x) => (x.id === updated.id ? { ...x, ...updated } : x)));
         this.pending.update((p) => { const copy = { ...p }; delete copy[r.id]; return copy; });
       },
       error: (err: unknown) => {
