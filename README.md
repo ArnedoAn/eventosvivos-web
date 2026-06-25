@@ -39,7 +39,3 @@ export const environment = {
   apiBaseUrl: 'http://localhost:8080/api',
 };
 ```
-
-## Deploy
-
-The production build in `dist/` is a static bundle that can be deployed to any static host, CDN, or container. The hosting provider is swappable; common options include Netlify, Vercel, Render Static Sites, an nginx container, or S3 + CloudFront.
