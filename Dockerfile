@@ -6,7 +6,7 @@ FROM node:24 AS build
 WORKDIR /app
 
 # Copy package manifests first for better layer caching
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml .npmrc ./
 
 # Install pnpm (pinned to match packageManager field) and dependencies
 RUN corepack enable && corepack prepare pnpm@11.9.0 --activate && \
