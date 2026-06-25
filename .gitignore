@@ -46,6 +46,10 @@ Thumbs.db
 .playwright-cli/
 skills-lock.json
 
+# Markdown docs (keep only README.md)
+*.md
+!README.md
+
 # Playwright CLI session artifacts (screenshots/snapshots at root)
 /*.png
 /admin-*.yml

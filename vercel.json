@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist/eventosvivos-web/browser",
+  "installCommand": "corepack enable && corepack prepare pnpm@11.9.0 --activate && pnpm install --frozen-lockfile",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
