@@ -1,11 +1,13 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 
+import { AuthStore } from '../../core/auth/auth.store';
 import type { EventResponse } from '../../core/models/event.model';
-import { venueName } from '../../core/models/venue.model';
+import { VenuesStore } from '../../core/stores/venues.store';
 import { ReserveDialog } from '../reservations/reserve-dialog.component';
 
 @Component({
@@ -13,6 +15,7 @@ import { ReserveDialog } from '../reservations/reserve-dialog.component';
   imports: [
     DatePipe,
     DecimalPipe,
+    RouterLink,
     ReserveDialog,
     ...HlmCardImports,
     ...HlmBadgeImports,
@@ -23,6 +26,8 @@ import { ReserveDialog } from '../reservations/reserve-dialog.component';
 })
 export class EventCard {
   readonly event = input.required<EventResponse>();
+  protected readonly authStore = inject(AuthStore);
+  protected readonly venuesStore = inject(VenuesStore);
 
   readonly statusVariant = computed(() => {
     const status = this.event().status;
@@ -32,6 +37,6 @@ export class EventCard {
   });
 
   venueName(id: number): string {
-    return venueName(id);
+    return this.venuesStore.name(id);
   }
 }

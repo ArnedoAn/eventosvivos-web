@@ -1,100 +1,110 @@
-<section class="mx-auto flex max-w-2xl flex-col gap-6">
-  <h2 class="text-2xl font-semibold tracking-tight">Administrar reservas</h2>
+<section class="flex flex-col gap-6">
+  <div class="flex items-center justify-between">
+    <h2 class="text-2xl font-semibold tracking-tight">Administrar reservas</h2>
+    <button hlmBtn variant="outline" (click)="load()" [disabled]="loading()">
+      @if (loading()) {
+        <hlm-spinner class="mr-2 size-4" />
+      }
+      Actualizar
+    </button>
+  </div>
 
+  <!-- Filtros -->
   <div hlmCard>
-    <div hlmCardHeader>
-      <h3 hlmCardTitle>Operar por ID de reserva</h3>
-      <p hlmCardDescription>Ingresa el UUID de la reserva para confirmarla o cancelarla.</p>
-    </div>
-    <div hlmCardContent class="flex flex-col gap-4">
-      <div hlmField>
-        <label hlmFieldLabel for="reservationId">ID de reserva</label>
-        <input
-          hlmInput
-          id="reservationId"
-          type="text"
-          [ngModel]="reservationId()"
-          (ngModelChange)="reservationId.set($event); result.set(null); errorMessage.set(null)"
-          placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-          [disabled]="!!pending()"
-        />
+    <div hlmCardContent class="flex flex-wrap gap-4 pt-4">
+      <div hlmField class="min-w-[180px] flex-1">
+        <label hlmFieldLabel for="filterStatus">Estado</label>
+        <select hlmInput id="filterStatus" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+          <option value="">Todos</option>
+          <option value="PendientePago">Pendiente de pago</option>
+          <option value="Confirmada">Confirmada</option>
+          <option value="Cancelada">Cancelada</option>
+        </select>
       </div>
-
-      @if (errorMessage()) {
-        <div hlmAlert variant="destructive">
-          <h4 hlmAlertTitle>Error</h4>
-          <p hlmAlertDescription>{{ errorMessage() }}</p>
-        </div>
-      }
-
-      @if (result(); as reservation) {
-        <hr hlmSeparator />
-        <div class="flex flex-col gap-3 rounded-md border p-4">
-          <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">ID</span>
-            <span class="font-mono text-sm">{{ reservation.id }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Comprador</span>
-            <span>{{ reservation.buyerName }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Correo</span>
-            <span>{{ reservation.buyerEmail }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Cantidad</span>
-            <span>{{ reservation.quantity }}</span>
-          </div>
-          <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Estado</span>
-            <span hlmBadge [variant]="statusVariant(reservation.status)">
-              {{ statusLabel(reservation.status) }}
-            </span>
-          </div>
-        </div>
-      }
-
-      <div class="flex gap-3">
-        <button
-          hlmBtn
-          type="button"
-          class="flex-1"
-          (click)="confirm()"
-          [disabled]="!reservationId() || pending() === 'confirm' || (!!result() && !canConfirm())"
-        >
-          @if (pending() === 'confirm') {
-            <hlm-spinner class="mr-2 size-4" />
-          }
-          Confirmar
-        </button>
-
-        <button
-          hlmBtn
-          variant="destructive"
-          type="button"
-          class="flex-1"
-          (click)="cancel()"
-          [disabled]="!reservationId() || pending() === 'cancel' || (!!result() && !canCancel())"
-        >
-          @if (pending() === 'cancel') {
-            <hlm-spinner class="mr-2 size-4" />
-          }
-          Cancelar
-        </button>
-
-        @if (result()) {
-          <button hlmBtn variant="outline" type="button" (click)="reset()">
-            Nueva consulta
-          </button>
-        }
+      <div hlmField class="min-w-[260px] flex-1">
+        <label hlmFieldLabel for="filterEventId">ID de evento (prefijo)</label>
+        <input hlmInput id="filterEventId" type="text" [ngModel]="filterEventId()" (ngModelChange)="filterEventId.set($event)" placeholder="xxxxxxxx-..." />
       </div>
-
-      @if (result()?.status === 'PendientePago') {
-        <p class="text-sm text-muted-foreground">
-          Solo se pueden cancelar reservas <strong>confirmadas</strong>.
-        </p>
-      }
     </div>
+  </div>
+
+  <!-- Error de carga -->
+  @if (loadError()) {
+    <div hlmAlert variant="destructive">
+      <h4 hlmAlertTitle>No se pudieron cargar las reservas</h4>
+      <p hlmAlertDescription>{{ loadError() }}</p>
+    </div>
+  }
+
+  <!-- Spinner inicial -->
+  @if (loading() && reservations().length === 0) {
+    <div class="flex justify-center py-12">
+      <hlm-spinner aria-label="Cargando reservas" />
+    </div>
+  }
+
+  <!-- Lista -->
+  @if (!loading() && filtered().length === 0 && !loadError()) {
+    <p class="text-center text-muted-foreground py-8">No hay reservas que coincidan.</p>
+  }
+
+  <div class="flex flex-col gap-3">
+    @for (r of filtered(); track r.id) {
+      <div hlmCard>
+        <div hlmCardContent class="flex flex-col gap-3 pt-4">
+          <!-- Encabezado -->
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex flex-col gap-0.5">
+              <span class="font-semibold">{{ r.buyerName }}</span>
+              <span class="text-sm text-muted-foreground">{{ r.buyerEmail }}</span>
+            </div>
+            <span hlmBadge [variant]="statusVariant(r.status)">{{ statusLabel(r.status) }}</span>
+          </div>
+
+          <!-- Detalle -->
+          <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            <span>Cantidad</span><span class="text-foreground">{{ r.quantity }}</span>
+            <span>Evento</span><span class="font-mono text-xs text-foreground">{{ r.eventId }}</span>
+            <span>Reserva</span><span class="font-mono text-xs text-foreground">{{ r.id }}</span>
+          </div>
+
+          <!-- Error item -->
+          @if (itemErrors()[r.id]) {
+            <div hlmAlert variant="destructive">
+              <p hlmAlertDescription>{{ itemErrors()[r.id] }}</p>
+            </div>
+          }
+
+          <!-- Acciones -->
+          <div class="flex gap-2">
+            <button
+              hlmBtn
+              type="button"
+              class="flex-1"
+              [disabled]="!canConfirm(r)"
+              (click)="confirm(r)"
+            >
+              @if (pending()[r.id] === 'confirm') {
+                <hlm-spinner class="mr-2 size-4" />
+              }
+              Confirmar
+            </button>
+            <button
+              hlmBtn
+              variant="destructive"
+              type="button"
+              class="flex-1"
+              [disabled]="!canCancel(r)"
+              (click)="cancel(r)"
+            >
+              @if (pending()[r.id] === 'cancel') {
+                <hlm-spinner class="mr-2 size-4" />
+              }
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   </div>
 </section>

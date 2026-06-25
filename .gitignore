@@ -45,3 +45,17 @@ Thumbs.db
 .playwright/
 .playwright-cli/
 skills-lock.json
+
+# Playwright CLI session artifacts (screenshots/snapshots at root)
+/*.png
+/admin-*.yml
+/create-*.yml
+/dialog*.yml
+/events-*.yml
+/event-*.yml
+/filter-*.yml
+/login-*.yml
+/nav-*.yml
+/occupancy*.yml
+/reservations-*.yml
+/reserve-*.yml

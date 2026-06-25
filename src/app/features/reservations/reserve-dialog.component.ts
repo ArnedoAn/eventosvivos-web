@@ -1,4 +1,6 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { startWith, map } from 'rxjs';
 import {
   FormBuilder,
   ReactiveFormsModule,
@@ -70,7 +72,11 @@ export class ReserveDialog {
   readonly result = signal<ReservationResponse | null>(null);
   readonly error = signal<string | null>(null);
 
-  readonly submitDisabled = computed(() => this.form.invalid || this.loading());
+  private readonly formValid = toSignal(
+    this.form.statusChanges.pipe(startWith(this.form.status), map(s => s === 'VALID')),
+    { initialValue: false },
+  );
+  readonly submitDisabled = computed(() => !this.formValid() || this.loading());
 
   submit(): void {
     if (this.form.invalid || this.loading()) return;

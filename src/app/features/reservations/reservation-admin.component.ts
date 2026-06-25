@@ -6,12 +6,15 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmFieldImports } from '@spartan-ng/helm/field';
 import { HlmInputImports } from '@spartan-ng/helm/input';
-import { HlmSeparatorImports } from '@spartan-ng/helm/separator';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 
 import { ReservationsApiService } from '../../core/api/reservations-api.service';
 import { mapErrorToSpanish } from '../../core/http/error-messages';
-import type { ReservationResponse, ReservationStatus } from '../../core/models/reservation.model';
+import type {
+  ReservationFilter,
+  ReservationResponse,
+  ReservationStatus,
+} from '../../core/models/reservation.model';
 
 const STATUS_LABELS: Record<ReservationStatus, string> = {
   PendientePago: 'Pendiente de pago',
@@ -30,7 +33,6 @@ const STATUS_LABELS: Record<ReservationStatus, string> = {
     ...HlmButtonImports,
     ...HlmSpinnerImports,
     ...HlmAlertImports,
-    ...HlmSeparatorImports,
   ],
   templateUrl: './reservation-admin.html',
   styleUrl: './reservation-admin.scss',
@@ -38,75 +40,91 @@ const STATUS_LABELS: Record<ReservationStatus, string> = {
 export class ReservationAdmin {
   private readonly reservationsApi = inject(ReservationsApiService);
 
-  readonly reservationId = signal('');
-  readonly pending = signal<'confirm' | 'cancel' | null>(null);
-  readonly result = signal<ReservationResponse | null>(null);
-  readonly errorMessage = signal<string | null>(null);
+  readonly reservations = signal<ReservationResponse[]>([]);
+  readonly loading = signal(false);
+  readonly loadError = signal<string | null>(null);
 
-  readonly canConfirm = computed(
-    () => this.result()?.status === 'PendientePago' && !this.pending(),
-  );
+  readonly filterStatus = signal<ReservationStatus | ''>('');
+  readonly filterEventId = signal('');
 
-  readonly canCancel = computed(
-    () => this.result()?.status === 'Confirmada' && !this.pending(),
-  );
+  readonly pending = signal<Record<string, 'confirm' | 'cancel'>>({});
+  readonly itemErrors = signal<Record<string, string>>({});
 
-  confirm(): void {
-    const id = this.result()?.id ?? this.reservationId().trim();
-    if (!id || this.pending()) return;
+  readonly filtered = computed(() => {
+    const status = this.filterStatus();
+    const eventId = this.filterEventId().trim();
+    return this.reservations().filter((r) => {
+      if (status && r.status !== status) return false;
+      if (eventId && !r.eventId.startsWith(eventId)) return false;
+      return true;
+    });
+  });
 
-    this.pending.set('confirm');
-    this.errorMessage.set(null);
+  constructor() {
+    this.load();
+  }
 
-    this.reservationsApi.confirm(id).subscribe({
-      next: (res) => {
-        this.result.set(res);
-        this.pending.set(null);
+  load(): void {
+    this.loading.set(true);
+    this.loadError.set(null);
+
+    const filter: ReservationFilter = {};
+    this.reservationsApi.list(filter).subscribe({
+      next: (list) => {
+        this.reservations.set(list);
+        this.loading.set(false);
       },
       error: (err: unknown) => {
-        this.errorMessage.set(this.mapError(err));
-        this.pending.set(null);
+        this.loadError.set(this.mapError(err));
+        this.loading.set(false);
       },
     });
   }
 
-  cancel(): void {
-    const id = this.result()?.id ?? this.reservationId().trim();
-    if (!id || this.pending()) return;
+  canConfirm(r: ReservationResponse): boolean {
+    return r.status === 'PendientePago' && !this.pending()[r.id];
+  }
 
-    this.pending.set('cancel');
-    this.errorMessage.set(null);
+  canCancel(r: ReservationResponse): boolean {
+    return r.status === 'Confirmada' && !this.pending()[r.id];
+  }
 
-    this.reservationsApi.cancel(id).subscribe({
-      next: (res) => {
-        this.result.set(res);
-        this.pending.set(null);
+  confirm(r: ReservationResponse): void {
+    this.pending.update((p) => ({ ...p, [r.id]: 'confirm' }));
+    this.itemErrors.update((e) => { const copy = { ...e }; delete copy[r.id]; return copy; });
+
+    this.reservationsApi.confirm(r.id).subscribe({
+      next: (updated) => {
+        this.reservations.update((list) => list.map((x) => (x.id === updated.id ? updated : x)));
+        this.pending.update((p) => { const copy = { ...p }; delete copy[r.id]; return copy; });
       },
       error: (err: unknown) => {
-        this.errorMessage.set(this.mapError(err));
-        this.pending.set(null);
+        this.itemErrors.update((e) => ({ ...e, [r.id]: this.mapError(err) }));
+        this.pending.update((p) => { const copy = { ...p }; delete copy[r.id]; return copy; });
       },
     });
   }
 
-  reset(): void {
-    this.reservationId.set('');
-    this.result.set(null);
-    this.errorMessage.set(null);
-    this.pending.set(null);
+  cancel(r: ReservationResponse): void {
+    this.pending.update((p) => ({ ...p, [r.id]: 'cancel' }));
+    this.itemErrors.update((e) => { const copy = { ...e }; delete copy[r.id]; return copy; });
+
+    this.reservationsApi.cancel(r.id).subscribe({
+      next: (updated) => {
+        this.reservations.update((list) => list.map((x) => (x.id === updated.id ? updated : x)));
+        this.pending.update((p) => { const copy = { ...p }; delete copy[r.id]; return copy; });
+      },
+      error: (err: unknown) => {
+        this.itemErrors.update((e) => ({ ...e, [r.id]: this.mapError(err) }));
+        this.pending.update((p) => { const copy = { ...p }; delete copy[r.id]; return copy; });
+      },
+    });
   }
 
   statusVariant(status: ReservationStatus): BadgeVariants['variant'] {
-    switch (status) {
-      case 'Confirmada':
-        return 'default';
-      case 'PendientePago':
-        return 'secondary';
-      case 'Cancelada':
-        return 'destructive';
-      default:
-        return 'default';
-    }
+    if (status === 'Confirmada') return 'default';
+    if (status === 'PendientePago') return 'secondary';
+    return 'destructive';
   }
 
   statusLabel(status: ReservationStatus): string {

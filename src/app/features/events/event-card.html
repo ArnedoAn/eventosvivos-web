@@ -13,7 +13,12 @@
     </p>
     <p class="text-base font-semibold text-foreground">${{ event().price | number: '1.0-2' }}</p>
   </div>
-  <div hlmCardFooter>
+  <div hlmCardFooter class="flex flex-col gap-2">
     <app-reserve-dialog [event]="event()" class="w-full" />
+    @if (authStore.role() === 'Admin') {
+      <a hlmBtn variant="outline" class="w-full" [routerLink]="['/events', event().id, 'occupancy']">
+        Ver ocupación
+      </a>
+    }
   </div>
 </div>

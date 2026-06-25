@@ -1,6 +1,9 @@
 export type EventType = 'Conferencia' | 'Taller' | 'Concierto';
 export type EventStatus = 'Activo' | 'Cancelado' | 'Completado';
 
+export const EVENT_TYPES: EventType[] = ['Conferencia', 'Taller', 'Concierto'];
+export const EVENT_STATUSES: EventStatus[] = ['Activo', 'Cancelado', 'Completado'];
+
 export interface EventResponse {
   id: string;
   title: string;

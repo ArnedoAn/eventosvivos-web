@@ -54,7 +54,7 @@
           <label hlmFieldLabel for="venueId">Recinto</label>
           <select hlmInput id="venueId" formControlName="venueId">
             <option [value]="0" disabled>Seleccione un recinto</option>
-            @for (venue of venues; track venue.id) {
+            @for (venue of venuesStore.venues(); track venue.id) {
               <option [value]="venue.id">{{ venue.name }} — {{ venue.city }} (cap. {{ venue.capacity }})</option>
             }
           </select>

@@ -19,13 +19,15 @@ import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 
 import { EventsApiService } from '../../core/api/events-api.service';
-import type {
-  EventFilter,
-  EventResponse,
-  EventStatus,
-  EventType,
+import {
+  EVENT_STATUSES,
+  EVENT_TYPES,
+  type EventFilter,
+  type EventResponse,
+  type EventStatus,
+  type EventType,
 } from '../../core/models/event.model';
-import { VENUES } from '../../core/models/venue.model';
+import { VenuesStore } from '../../core/stores/venues.store';
 import { EventCard } from './event-card.component';
 
 type FilterFormValue = {
@@ -55,10 +57,10 @@ type FilterFormValue = {
 export class EventList {
   private readonly fb = inject(FormBuilder);
   private readonly eventsApi = inject(EventsApiService);
+  protected readonly venuesStore = inject(VenuesStore);
 
-  readonly eventTypes: EventType[] = ['Conferencia', 'Taller', 'Concierto'];
-  readonly eventStatuses: EventStatus[] = ['Activo', 'Cancelado', 'Completado'];
-  readonly venues = VENUES;
+  readonly eventTypes = EVENT_TYPES;
+  readonly eventStatuses = EVENT_STATUSES;
 
   readonly filterForm = this.fb.nonNullable.group({
     type: ['' as EventType | ''],

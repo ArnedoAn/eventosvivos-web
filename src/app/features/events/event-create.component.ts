@@ -17,8 +17,8 @@ import { HlmTextareaImports } from '@spartan-ng/helm/textarea';
 
 import { EventsApiService } from '../../core/api/events-api.service';
 import { mapErrorToSpanish } from '../../core/http/error-messages';
-import type { CreateEventRequest, EventType } from '../../core/models/event.model';
-import { VENUES, venueCapacity } from '../../core/models/venue.model';
+import { EVENT_TYPES, type CreateEventRequest, type EventType } from '../../core/models/event.model';
+import { VenuesStore } from '../../core/stores/venues.store';
 
 function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startUtc')?.value as string | undefined;
@@ -46,12 +46,12 @@ export class EventCreate {
   private readonly fb = inject(FormBuilder);
   private readonly eventsApi = inject(EventsApiService);
   private readonly router = inject(Router);
+  protected readonly venuesStore = inject(VenuesStore);
 
   readonly pending = signal(false);
   readonly serverError = signal<string | null>(null);
 
-  readonly eventTypes: EventType[] = ['Conferencia', 'Taller', 'Concierto'];
-  readonly venues = VENUES;
+  readonly eventTypes = EVENT_TYPES;
 
   readonly form = this.fb.nonNullable.group(
     {
@@ -101,7 +101,7 @@ export class EventCreate {
     const venueId = Number(group.get('venueId')?.value);
     const capacity = Number(group.get('capacity')?.value);
     if (!venueId || !capacity) return null;
-    const maxCap = venueCapacity(venueId);
+    const maxCap = this.venuesStore.capacity(venueId);
     return capacity <= maxCap ? null : { capacityExceedsVenue: { max: maxCap } };
   }
 
