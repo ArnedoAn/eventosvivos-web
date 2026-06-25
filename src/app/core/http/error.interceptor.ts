@@ -1,7 +1,9 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 
+import { AuthStore } from '../auth/auth.store';
 import { NotificationService } from '../notifications/notification.service';
 import { mapErrorToSpanish } from './error-messages';
 
@@ -14,10 +16,18 @@ export interface ProblemDetails {
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const notificationService = inject(NotificationService);
+  const authStore = inject(AuthStore);
+  const router = inject(Router);
 
   return next(req).pipe(
     catchError((error: unknown) => {
       const problem = extractProblemDetails(error);
+
+      if (problem.status === 401 && authStore.isAuthenticated()) {
+        authStore.logout();
+        void router.navigate(['/login']);
+      }
+
       const message = mapErrorToSpanish(problem.detail, problem.code, problem.status);
       notificationService.push({ text: message, type: 'error' });
       return throwError(() => error);
