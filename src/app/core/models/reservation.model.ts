@@ -16,6 +16,7 @@ export interface ReservationResponse {
   buyerEmail: string;
   status: ReservationStatus;
   createdUtc: string;
+  eventName: string;
 }
 
 export interface CreateReservationRequest {
