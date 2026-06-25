@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm build",
+  "buildCommand": "node -e \"require('fs').writeFileSync('src/environments/environment.ts', \\\"export const environment = { apiBaseUrl: '\\\" + (process.env.API_BASE_URL || 'http://localhost:8080/api') + \\\"' };\\\\n\\\")\" && pnpm build",
   "outputDirectory": "dist/eventosvivos-web/browser",
   "installCommand": "corepack enable && corepack prepare pnpm@11.9.0 --activate && pnpm install --frozen-lockfile",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
