@@ -1,3 +1,9 @@
+declare global {
+  interface Window {
+    __env?: { apiUrl?: string };
+  }
+}
+
 export const environment = {
-  apiBaseUrl: 'http://localhost:8080/api',
+  apiBaseUrl: (typeof window !== 'undefined' && window.__env?.apiUrl) || '/api',
 };

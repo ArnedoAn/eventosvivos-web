@@ -39,6 +39,9 @@ Thumbs.db
 .env
 .env.*
 
+# Runtime-generated env config (template is committed, this is not)
+public/assets/env.js
+
 # Agent / skill tooling artifacts
 .agents/
 .claude/

@@ -11,14 +11,17 @@ RUN corepack enable && corepack prepare pnpm@11.9.0 --activate && \
 
 COPY . .
 
-ARG API_BASE_URL=http://localhost:8080/api
-RUN printf 'export const environment = { apiBaseUrl: "%s" };\n' "$API_BASE_URL" \
-    > src/environments/environment.ts && \
-    pnpm build
+RUN pnpm build
 
 FROM nginx:alpine
 
+RUN apk add --no-cache gettext
+
 COPY --from=build /app/dist/eventosvivos-web/browser/ /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
+
+ENTRYPOINT ["/entrypoint.sh"]
